@@ -1,0 +1,33 @@
+{
+  "name": "@rowanmanning/data-store",
+  "version": "0.0.0",
+  "description": "Represent your data",
+  "keywords": [
+    "data",
+    "model"
+  ],
+  "author": "Rowan Manning (https://rowanmanning.com/)",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/rowanmanning/data-store.git"
+  },
+  "homepage": "https://github.com/rowanmanning/data-store",
+  "bugs": "https://github.com/rowanmanning/data-store/issues",
+  "license": "MIT",
+  "engines": {
+    "node": ">=10"
+  },
+  "dependencies": {
+    "varname": "^2.0.3"
+  },
+  "devDependencies": {
+    "@rowanmanning/eslint-config": "^2.0.0",
+    "@rowanmanning/make": "^1.2.0",
+    "eslint": "^5.15.3",
+    "jest": "^24.5.0"
+  },
+  "main": "./lib/index.js",
+  "scripts": {
+    "test": "make ci"
+  }
+}
