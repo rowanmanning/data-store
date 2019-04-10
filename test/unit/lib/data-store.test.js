@@ -51,20 +51,6 @@ describe('lib/data-store', () => {
 
 		});
 
-		describe('.raw()', () => {
-			let returnValue;
-
-			beforeEach(() => {
-				instance.data = 'mock data';
-				returnValue = instance.raw();
-			});
-
-			it('returns the raw data', () => {
-				expect(returnValue).toStrictEqual('mock data');
-			});
-
-		});
-
 		describe('.get(property)', () => {
 			let returnValue;
 
@@ -386,7 +372,7 @@ describe('lib/data-store', () => {
 
 			beforeEach(() => {
 				originalInstance = new DataStore();
-				jest.spyOn(originalInstance, 'raw').mockReturnValue({
+				jest.spyOn(originalInstance, 'serialize').mockReturnValue({
 					mockProperty1: 'mock value 1',
 					mockProperty2: 'mock value 2'
 				});
@@ -397,8 +383,8 @@ describe('lib/data-store', () => {
 				instance = new DataStore(originalInstance);
 			});
 
-			it('gets the raw data from the original instance', () => {
-				expect(originalInstance.raw).toHaveBeenCalledTimes(1);
+			it('gets the serialized data from the original instance', () => {
+				expect(originalInstance.serialize).toHaveBeenCalledTimes(1);
 			});
 
 			it('calls `DataStore.normalizePropertyForStorage` with each property', () => {
@@ -464,7 +450,7 @@ describe('lib/data-store', () => {
 
 		it('returns a new DataStore instance, which was instantiated with `data`', () => {
 			expect(returnValue).toBeInstanceOf(DataStore);
-			expect(returnValue.raw()).toStrictEqual(data);
+			expect(returnValue.data).toStrictEqual(data);
 		});
 
 		describe('when `data` is an array of objects', () => {
@@ -484,9 +470,9 @@ describe('lib/data-store', () => {
 			it('returns an array of new DataStore instances, which were instantiated with each object in `data`', () => {
 				expect(returnValue).toBeInstanceOf(Array);
 				expect(returnValue[0]).toBeInstanceOf(DataStore);
-				expect(returnValue[0].raw()).toStrictEqual(data[0]);
+				expect(returnValue[0].data).toStrictEqual(data[0]);
 				expect(returnValue[1]).toBeInstanceOf(DataStore);
-				expect(returnValue[1].raw()).toStrictEqual(data[1]);
+				expect(returnValue[1].data).toStrictEqual(data[1]);
 			});
 
 		});
