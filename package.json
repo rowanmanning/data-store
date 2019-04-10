@@ -1,7 +1,7 @@
 {
   "name": "@rowanmanning/data-store",
   "version": "0.0.0",
-  "description": "Represent your data",
+  "description": "Represent your data with model-like objects",
   "keywords": [
     "data",
     "model"
