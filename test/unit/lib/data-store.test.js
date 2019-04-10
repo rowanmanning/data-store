@@ -68,13 +68,13 @@ describe('lib/data-store', () => {
 		describe('.get(property)', () => {
 			let returnValue;
 
-			beforeEach(async () => {
+			beforeEach(() => {
 				DataStore.normalizePropertyForStorage.mockClear();
 				DataStore.normalizePropertyForStorage.mockReturnValue('mockNormalizedProperty1');
 				instance.data = {
 					mockNormalizedProperty1: 'mock value 1'
 				};
-				returnValue = await instance.get('mockProperty1');
+				returnValue = instance.get('mockProperty1');
 			});
 
 			it('calls `DataStore.normalizePropertyForStorage` with the property', () => {
@@ -88,11 +88,11 @@ describe('lib/data-store', () => {
 
 			describe('when `property` has a corresponding getter function', () => {
 
-				beforeEach(async () => {
+				beforeEach(() => {
 					DataStore.normalizePropertyForStorage.mockClear();
 					instance.data = {};
-					instance.getMockProperty1 = jest.fn().mockResolvedValue('mock value 1');
-					returnValue = await instance.get('mockProperty1');
+					instance.getMockProperty1 = jest.fn().mockReturnValue('mock value 1');
+					returnValue = instance.get('mockProperty1');
 				});
 
 				it('does not call `DataStore.normalizePropertyForStorage`', () => {
@@ -112,14 +112,14 @@ describe('lib/data-store', () => {
 
 			describe('when `property` has a corresponding getter which is not a function', () => {
 
-				beforeEach(async () => {
+				beforeEach(() => {
 					DataStore.normalizePropertyForStorage.mockClear();
 					DataStore.normalizePropertyForStorage.mockReturnValue('mockNormalizedProperty1');
 					instance.data = {
 						mockNormalizedProperty1: 'mock value 1'
 					};
 					instance.getMockProperty1 = 'not a function';
-					returnValue = await instance.get('mockProperty1');
+					returnValue = instance.get('mockProperty1');
 				});
 
 				it('calls `DataStore.normalizePropertyForStorage` with the property', () => {
@@ -137,9 +137,9 @@ describe('lib/data-store', () => {
 
 				it('throws an error', () => {
 					const expectedError = new TypeError('property name must be a string');
-					expect(instance.get(123)).rejects.toThrow(expectedError);
-					expect(instance.get([])).rejects.toThrow(expectedError);
-					expect(instance.get(null)).rejects.toThrow(expectedError);
+					expect(() => instance.get(123)).toThrow(expectedError);
+					expect(() => instance.get([])).toThrow(expectedError);
+					expect(() => instance.get(null)).toThrow(expectedError);
 				});
 
 			});
@@ -149,11 +149,11 @@ describe('lib/data-store', () => {
 		describe('.set(property, value)', () => {
 			let returnValue;
 
-			beforeEach(async () => {
-				jest.spyOn(instance, '_setOne').mockResolvedValue('set one return');
-				jest.spyOn(instance, '_setMany').mockResolvedValue('set many return');
+			beforeEach(() => {
+				jest.spyOn(instance, '_setOne').mockReturnValue('set one return');
+				jest.spyOn(instance, '_setMany').mockReturnValue('set many return');
 				instance.data = {};
-				returnValue = await instance.set('mockProperty1', 'mock value 1');
+				returnValue = instance.set('mockProperty1', 'mock value 1');
 			});
 
 			it('calls the `_setOne` method with the property and value', () => {
@@ -174,11 +174,11 @@ describe('lib/data-store', () => {
 		describe('.set(properties)', () => {
 			let returnValue;
 
-			beforeEach(async () => {
-				jest.spyOn(instance, '_setOne').mockResolvedValue('set one return');
-				jest.spyOn(instance, '_setMany').mockResolvedValue('set many return');
+			beforeEach(() => {
+				jest.spyOn(instance, '_setOne').mockReturnValue('set one return');
+				jest.spyOn(instance, '_setMany').mockReturnValue('set many return');
 				instance.data = {};
-				returnValue = await instance.set({
+				returnValue = instance.set({
 					mockProperty1: 'mock value 1',
 					mockProperty2: 'mock value 2'
 				});
@@ -205,11 +205,11 @@ describe('lib/data-store', () => {
 		describe('._setOne(property, value)', () => {
 			let returnValue;
 
-			beforeEach(async () => {
+			beforeEach(() => {
 				DataStore.normalizePropertyForStorage.mockClear();
 				DataStore.normalizePropertyForStorage.mockReturnValue('mockNormalizedProperty1');
 				instance.data = {};
-				returnValue = await instance._setOne('mockProperty1', 'mock value 1');
+				returnValue = instance._setOne('mockProperty1', 'mock value 1');
 			});
 
 			it('calls `DataStore.normalizePropertyForStorage` with the property', () => {
@@ -227,11 +227,11 @@ describe('lib/data-store', () => {
 
 			describe('when `property` has a corresponding setter function', () => {
 
-				beforeEach(async () => {
+				beforeEach(() => {
 					DataStore.normalizePropertyForStorage.mockClear();
 					instance.data = {};
-					instance.setMockProperty1 = jest.fn().mockResolvedValue('mock setter return');
-					returnValue = await instance._setOne('mockProperty1', 'mock value 1');
+					instance.setMockProperty1 = jest.fn().mockReturnValue('mock setter return');
+					returnValue = instance._setOne('mockProperty1', 'mock value 1');
 				});
 
 				it('does not call `DataStore.normalizePropertyForStorage`', () => {
@@ -251,11 +251,11 @@ describe('lib/data-store', () => {
 
 			describe('when `property` has a corresponding setter which is not a function', () => {
 
-				beforeEach(async () => {
+				beforeEach(() => {
 					DataStore.normalizePropertyForStorage.mockClear();
 					instance.data = {};
 					instance.setMockProperty1 = 'not a function';
-					returnValue = await instance._setOne('mockProperty1', 'mock value 1');
+					returnValue = instance._setOne('mockProperty1', 'mock value 1');
 				});
 
 				it('calls `DataStore.normalizePropertyForStorage` with the property', () => {
@@ -277,9 +277,9 @@ describe('lib/data-store', () => {
 
 				it('throws an error', () => {
 					const expectedError = new TypeError('property name must be a string');
-					expect(instance._setOne(123, 'mock value 1')).rejects.toThrow(expectedError);
-					expect(instance._setOne([], 'mock value 1')).rejects.toThrow(expectedError);
-					expect(instance._setOne(null, 'mock value 1')).rejects.toThrow(expectedError);
+					expect(() => instance._setOne(123, 'mock value 1')).toThrow(expectedError);
+					expect(() => instance._setOne([], 'mock value 1')).toThrow(expectedError);
+					expect(() => instance._setOne(null, 'mock value 1')).toThrow(expectedError);
 				});
 
 			});
@@ -289,10 +289,10 @@ describe('lib/data-store', () => {
 		describe('._setMany(properties)', () => {
 			let returnValue;
 
-			beforeEach(async () => {
-				jest.spyOn(instance, '_setOne').mockResolvedValue('set one return');
+			beforeEach(() => {
+				jest.spyOn(instance, '_setOne').mockReturnValue('set one return');
 				instance.data = {};
-				returnValue = await instance._setMany({
+				returnValue = instance._setMany({
 					mockProperty1: 'mock value 1',
 					mockProperty2: 'mock value 2'
 				});
@@ -315,9 +315,9 @@ describe('lib/data-store', () => {
 
 				it('throws an error', () => {
 					const expectedError = new TypeError('properties must be an object');
-					expect(instance._setMany(123)).rejects.toThrow(expectedError);
-					expect(instance._setMany([])).rejects.toThrow(expectedError);
-					expect(instance._setMany(null)).rejects.toThrow(expectedError);
+					expect(() => instance._setMany(123)).toThrow(expectedError);
+					expect(() => instance._setMany([])).toThrow(expectedError);
+					expect(() => instance._setMany(null)).toThrow(expectedError);
 				});
 
 			});
@@ -327,10 +327,10 @@ describe('lib/data-store', () => {
 		describe('.serialize()', () => {
 			let returnValue;
 
-			beforeEach(async () => {
+			beforeEach(() => {
 				jest.spyOn(instance, 'get')
-					.mockResolvedValueOnce('mock value 1')
-					.mockResolvedValueOnce('mock value 2');
+					.mockReturnValueOnce('mock value 1')
+					.mockReturnValueOnce('mock value 2');
 				jest.spyOn(DataStore, 'normalizePropertyForSerialization')
 					.mockReturnValueOnce('mockNormalizedProperty1')
 					.mockReturnValueOnce('mockNormalizedProperty2');
@@ -338,7 +338,7 @@ describe('lib/data-store', () => {
 					mockProperty1: 'mock value 1',
 					mockProperty2: 'mock value 1'
 				};
-				returnValue = await instance.serialize();
+				returnValue = instance.serialize();
 			});
 
 			it('gets each property', () => {
@@ -478,12 +478,12 @@ describe('lib/data-store', () => {
 		let instance;
 		let returnValue;
 
-		beforeEach(async () => {
+		beforeEach(() => {
 			instance = new DataStore({
 				mockProperty1: 'mock value 1'
 			});
-			jest.spyOn(instance, 'serialize').mockResolvedValue('mock serialize 1');
-			returnValue = await DataStore.serialize(instance);
+			jest.spyOn(instance, 'serialize').mockReturnValue('mock serialize 1');
+			returnValue = DataStore.serialize(instance);
 		});
 
 		it('serializes the DataStore instance', () => {
@@ -499,12 +499,12 @@ describe('lib/data-store', () => {
 			let instance1;
 			let instance2;
 
-			beforeEach(async () => {
+			beforeEach(() => {
 				instance1 = new DataStore();
-				jest.spyOn(instance1, 'serialize').mockResolvedValue('mock serialize 1');
+				jest.spyOn(instance1, 'serialize').mockReturnValue('mock serialize 1');
 				instance2 = new DataStore();
-				jest.spyOn(instance2, 'serialize').mockResolvedValue('mock serialize 2');
-				returnValue = await DataStore.serialize([
+				jest.spyOn(instance2, 'serialize').mockReturnValue('mock serialize 2');
+				returnValue = DataStore.serialize([
 					instance1,
 					instance2
 				]);
@@ -529,9 +529,9 @@ describe('lib/data-store', () => {
 
 			it('throws an error', () => {
 				const expectedError = new TypeError('dataStore argument must be an instance of DataStore');
-				expect(DataStore.serialize(123)).rejects.toThrow(expectedError);
-				expect(DataStore.serialize({})).rejects.toThrow(expectedError);
-				expect(DataStore.serialize(null)).rejects.toThrow(expectedError);
+				expect(() => DataStore.serialize(123)).toThrow(expectedError);
+				expect(() => DataStore.serialize({})).toThrow(expectedError);
+				expect(() => DataStore.serialize(null)).toThrow(expectedError);
 			});
 
 		});
@@ -540,9 +540,9 @@ describe('lib/data-store', () => {
 
 			it('throws an error', () => {
 				const expectedError = new TypeError('dataStore argument must be an instance of DataStore');
-				expect(DataStore.serialize([123])).rejects.toThrow(expectedError);
-				expect(DataStore.serialize([{}])).rejects.toThrow(expectedError);
-				expect(DataStore.serialize([null])).rejects.toThrow(expectedError);
+				expect(() => DataStore.serialize([123])).toThrow(expectedError);
+				expect(() => DataStore.serialize([{}])).toThrow(expectedError);
+				expect(() => DataStore.serialize([null])).toThrow(expectedError);
 			});
 
 		});
