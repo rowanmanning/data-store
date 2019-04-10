@@ -362,6 +362,25 @@ describe('lib/data-store', () => {
 
 		});
 
+		describe('.toJSON()', () => {
+			let returnValue;
+
+			beforeEach(() => {
+				jest.spyOn(instance, 'serialize').mockReturnValue('mock serialized data');
+				returnValue = instance.toJSON();
+			});
+
+			it('serializes the data store', () => {
+				expect(instance.serialize).toHaveBeenCalledTimes(1);
+				expect(instance.serialize).toHaveBeenCalledWith();
+			});
+
+			it('returns the serialized data', () => {
+				expect(returnValue).toStrictEqual('mock serialized data');
+			});
+
+		});
+
 		describe('when `data` is a DataStore instance', () => {
 			let originalInstance;
 
