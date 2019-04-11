@@ -20,6 +20,7 @@ Represent your data with model-like objects.
       * [Validators](#validators)
       * [Property normalisation](#property-normalisation)
       * [Serialized property normalization](#serialized-property-normalization)
+      * [Allowed properties](#allowed-properties)
   * [Contributing](#contributing)
   * [License](#license)
 
@@ -321,6 +322,41 @@ const banana = new Fruit({
 });
 
 banana.serialize(); // { scientific_name: 'yellow' }
+```
+
+#### Allowed properties
+
+The properties that are allowed to be set on a data store can be limited by specifying static properties on an extending class. The properties are `allowedProperties` and `disallowedProperties`, and they must be set to an array.
+
+These allow/disallow lists are checked internally by the `set` method, and only [normalised properties](#property-normalisation) should be added to the list as properties are checked post-normalisation.
+
+```js
+class Fruit extends DataStore {}
+
+Fruit.allowedProperties = [
+    'color',
+    'shape'
+];
+
+// Throws because `requiresPeeling` is not an allowed property
+const banana = new Fruit({
+    color: 'yellow',
+    requiresPeeling: true
+});
+```
+
+```js
+class Fruit extends DataStore {}
+
+Fruit.disallowedProperties = [
+    'shape'
+];
+
+// Throws because `shape` is a disallowed property
+const banana = new Fruit({
+    color: 'yellow',
+    shape: 'curved'
+});
 ```
 
 

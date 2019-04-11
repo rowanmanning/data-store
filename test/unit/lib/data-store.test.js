@@ -24,6 +24,7 @@ describe('lib/data-store', () => {
 			jest.spyOn(DataStore, 'normalizePropertyForStorage')
 				.mockReturnValueOnce('mockNormalizedProperty1')
 				.mockReturnValueOnce('mockNormalizedProperty2');
+			jest.spyOn(DataStore, 'isAllowedProperty').mockReturnValue(true);
 			data = {
 				mockProperty1: 'mock value 1',
 				mockProperty2: 'mock value 2'
@@ -194,8 +195,12 @@ describe('lib/data-store', () => {
 			let returnValue;
 
 			beforeEach(() => {
+				DataStore.isAllowedProperty.mockClear();
 				DataStore.normalizePropertyForStorage.mockClear();
 				DataStore.normalizePropertyForStorage.mockReturnValue('mockNormalizedProperty1');
+				jest.spyOn(instance, 'invalidate').mockImplementation(() => {
+					throw new Error('mock error');
+				});
 				instance.data = {};
 				returnValue = instance._setOne('mockProperty1', 'mock value 1');
 			});
@@ -203,6 +208,11 @@ describe('lib/data-store', () => {
 			it('calls `DataStore.normalizePropertyForStorage` with the property', () => {
 				expect(DataStore.normalizePropertyForStorage).toHaveBeenCalledTimes(1);
 				expect(DataStore.normalizePropertyForStorage).toHaveBeenCalledWith('mockProperty1');
+			});
+
+			it('checks that the property is allowed', () => {
+				expect(DataStore.isAllowedProperty).toHaveBeenCalledTimes(1);
+				expect(DataStore.isAllowedProperty).toHaveBeenCalledWith('mockNormalizedProperty1');
 			});
 
 			it('sets the specified property to the given value', () => {
@@ -213,23 +223,66 @@ describe('lib/data-store', () => {
 				expect(returnValue).toStrictEqual('mock value 1');
 			});
 
+			describe('when `property` is not allowed', () => {
+				let caughtError;
+
+				beforeEach(() => {
+					DataStore.isAllowedProperty.mockClear();
+					DataStore.normalizePropertyForStorage.mockClear();
+					instance.data = {};
+					DataStore.isAllowedProperty.mockReturnValue(false);
+					try {
+						instance._setOne('mockProperty1', 'mock value 1');
+					} catch (error) {
+						caughtError = error;
+					}
+				});
+
+				it('calls `DataStore.normalizePropertyForStorage` with the property', () => {
+					expect(DataStore.normalizePropertyForStorage).toHaveBeenCalledTimes(1);
+					expect(DataStore.normalizePropertyForStorage).toHaveBeenCalledWith('mockProperty1');
+				});
+
+				it('checks that the property is allowed', () => {
+					expect(DataStore.isAllowedProperty).toHaveBeenCalledTimes(1);
+					expect(DataStore.isAllowedProperty).toHaveBeenCalledWith('mockNormalizedProperty1');
+				});
+
+				it('does not set the property', () => {
+					expect(instance.data.mockNormalizedProperty1).toBeUndefined();
+				});
+
+				it('throws a validation error', () => {
+					expect(instance.invalidate).toHaveBeenCalledTimes(1);
+					expect(instance.invalidate).toHaveBeenCalledWith('DataStore.mockNormalizedProperty1 is not an allowed property name');
+					expect(caughtError).toStrictEqual(instance.invalidate.mock.results[0].value);
+				});
+
+			});
+
 			describe('when `property` has a corresponding validator function', () => {
 
 				beforeEach(() => {
+					DataStore.isAllowedProperty.mockClear();
 					DataStore.normalizePropertyForStorage.mockClear();
 					instance.data = {};
 					instance.validateMockProperty1 = jest.fn().mockReturnValue('mock validator return');
 					returnValue = instance._setOne('mockProperty1', 'mock value 1');
 				});
 
-				it('validates the property value using the validator', () => {
-					expect(instance.validateMockProperty1).toHaveBeenCalledTimes(1);
-					expect(instance.validateMockProperty1).toHaveBeenCalledWith('mock value 1');
-				});
-
 				it('calls `DataStore.normalizePropertyForStorage` with the property', () => {
 					expect(DataStore.normalizePropertyForStorage).toHaveBeenCalledTimes(1);
 					expect(DataStore.normalizePropertyForStorage).toHaveBeenCalledWith('mockProperty1');
+				});
+
+				it('checks that the property is allowed', () => {
+					expect(DataStore.isAllowedProperty).toHaveBeenCalledTimes(1);
+					expect(DataStore.isAllowedProperty).toHaveBeenCalledWith('mockNormalizedProperty1');
+				});
+
+				it('validates the property value using the validator', () => {
+					expect(instance.validateMockProperty1).toHaveBeenCalledTimes(1);
+					expect(instance.validateMockProperty1).toHaveBeenCalledWith('mock value 1');
 				});
 
 				it('sets the specified property to the given value', () => {
@@ -247,6 +300,7 @@ describe('lib/data-store', () => {
 				let validationError;
 
 				beforeEach(() => {
+					DataStore.isAllowedProperty.mockClear();
 					DataStore.normalizePropertyForStorage.mockClear();
 					instance.data = {};
 					validationError = new Error('mock validation error');
@@ -260,13 +314,23 @@ describe('lib/data-store', () => {
 					}
 				});
 
+				it('calls `DataStore.normalizePropertyForStorage` with the property', () => {
+					expect(DataStore.normalizePropertyForStorage).toHaveBeenCalledTimes(1);
+					expect(DataStore.normalizePropertyForStorage).toHaveBeenCalledWith('mockProperty1');
+				});
+
+				it('checks that the property is allowed', () => {
+					expect(DataStore.isAllowedProperty).toHaveBeenCalledTimes(1);
+					expect(DataStore.isAllowedProperty).toHaveBeenCalledWith('mockNormalizedProperty1');
+				});
+
 				it('validates the property value using the validator', () => {
 					expect(instance.validateMockProperty1).toHaveBeenCalledTimes(1);
 					expect(instance.validateMockProperty1).toHaveBeenCalledWith('mock value 1');
 				});
 
-				it('does not call `DataStore.normalizePropertyForStorage`', () => {
-					expect(DataStore.normalizePropertyForStorage).toHaveBeenCalledTimes(0);
+				it('does not set the property', () => {
+					expect(instance.data.mockNormalizedProperty1).toBeUndefined();
 				});
 
 				it('throws the validation error', () => {
@@ -278,14 +342,21 @@ describe('lib/data-store', () => {
 			describe('when `property` has a corresponding setter function', () => {
 
 				beforeEach(() => {
+					DataStore.isAllowedProperty.mockClear();
 					DataStore.normalizePropertyForStorage.mockClear();
 					instance.data = {};
 					instance.setMockProperty1 = jest.fn().mockReturnValue('mock setter return');
 					returnValue = instance._setOne('mockProperty1', 'mock value 1');
 				});
 
-				it('does not call `DataStore.normalizePropertyForStorage`', () => {
-					expect(DataStore.normalizePropertyForStorage).toHaveBeenCalledTimes(0);
+				it('calls `DataStore.normalizePropertyForStorage` with the property', () => {
+					expect(DataStore.normalizePropertyForStorage).toHaveBeenCalledTimes(1);
+					expect(DataStore.normalizePropertyForStorage).toHaveBeenCalledWith('mockProperty1');
+				});
+
+				it('checks that the property is allowed', () => {
+					expect(DataStore.isAllowedProperty).toHaveBeenCalledTimes(1);
+					expect(DataStore.isAllowedProperty).toHaveBeenCalledWith('mockNormalizedProperty1');
 				});
 
 				it('calls the setter function with the value', () => {
@@ -302,6 +373,7 @@ describe('lib/data-store', () => {
 			describe('when `property` has a corresponding setter which is not a function', () => {
 
 				beforeEach(() => {
+					DataStore.isAllowedProperty.mockClear();
 					DataStore.normalizePropertyForStorage.mockClear();
 					instance.data = {};
 					instance.setMockProperty1 = 'not a function';
@@ -311,6 +383,11 @@ describe('lib/data-store', () => {
 				it('calls `DataStore.normalizePropertyForStorage` with the property', () => {
 					expect(DataStore.normalizePropertyForStorage).toHaveBeenCalledTimes(1);
 					expect(DataStore.normalizePropertyForStorage).toHaveBeenCalledWith('mockProperty1');
+				});
+
+				it('checks that the property is allowed', () => {
+					expect(DataStore.isAllowedProperty).toHaveBeenCalledTimes(1);
+					expect(DataStore.isAllowedProperty).toHaveBeenCalledWith('mockNormalizedProperty1');
 				});
 
 				it('sets the specified property to the given value', () => {
@@ -668,6 +745,76 @@ describe('lib/data-store', () => {
 
 		it('returns the converted property', () => {
 			expect(returnValue).toStrictEqual(varname.camelback.mock.results[0].value);
+		});
+
+	});
+
+	describe('.isAllowedProperty(normalizedProperty)', () => {
+		let returnValue;
+
+		beforeEach(() => {
+			returnValue = DataStore.isAllowedProperty('mockProperty1');
+		});
+
+		afterEach(() => {
+			delete DataStore.allowedProperties;
+			delete DataStore.disallowedProperties;
+		});
+
+		it('returns `true`', () => {
+			expect(returnValue).toStrictEqual(true);
+		});
+
+		describe('when the DataStore has an `allowedProperties` array which includes the property', () => {
+
+			beforeEach(() => {
+				DataStore.allowedProperties = ['mockProperty1'];
+				returnValue = DataStore.isAllowedProperty('mockProperty1');
+			});
+
+			it('returns `true`', () => {
+				expect(returnValue).toStrictEqual(true);
+			});
+
+		});
+
+		describe('when the DataStore has an `allowedProperties` array which does not include the property', () => {
+
+			beforeEach(() => {
+				DataStore.allowedProperties = ['mockProperty2'];
+				returnValue = DataStore.isAllowedProperty('mockProperty1');
+			});
+
+			it('returns `false`', () => {
+				expect(returnValue).toStrictEqual(false);
+			});
+
+		});
+
+		describe('when the DataStore has a `disallowedProperties` array which does not include the property', () => {
+
+			beforeEach(() => {
+				DataStore.disallowedProperties = ['mockProperty2'];
+				returnValue = DataStore.isAllowedProperty('mockProperty1');
+			});
+
+			it('returns `true`', () => {
+				expect(returnValue).toStrictEqual(true);
+			});
+
+		});
+
+		describe('when the DataStore has a `disallowedProperties` array which does include the property', () => {
+
+			beforeEach(() => {
+				DataStore.disallowedProperties = ['mockProperty1'];
+				returnValue = DataStore.isAllowedProperty('mockProperty1');
+			});
+
+			it('returns `false`', () => {
+				expect(returnValue).toStrictEqual(false);
+			});
+
 		});
 
 	});
