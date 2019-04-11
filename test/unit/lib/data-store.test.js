@@ -2,10 +2,12 @@
 
 describe('lib/data-store', () => {
 	let DataStore;
+	let ValidationError;
 	let varname;
 
 	beforeEach(() => {
 		jest.resetModules();
+		ValidationError = require('../../../lib/validation-error');
 		varname = require('varname');
 		DataStore = require('../../../lib/data-store');
 	});
@@ -211,6 +213,68 @@ describe('lib/data-store', () => {
 				expect(returnValue).toStrictEqual('mock value 1');
 			});
 
+			describe('when `property` has a corresponding validator function', () => {
+
+				beforeEach(() => {
+					DataStore.normalizePropertyForStorage.mockClear();
+					instance.data = {};
+					instance.validateMockProperty1 = jest.fn().mockReturnValue('mock validator return');
+					returnValue = instance._setOne('mockProperty1', 'mock value 1');
+				});
+
+				it('validates the property value using the validator', () => {
+					expect(instance.validateMockProperty1).toHaveBeenCalledTimes(1);
+					expect(instance.validateMockProperty1).toHaveBeenCalledWith('mock value 1');
+				});
+
+				it('calls `DataStore.normalizePropertyForStorage` with the property', () => {
+					expect(DataStore.normalizePropertyForStorage).toHaveBeenCalledTimes(1);
+					expect(DataStore.normalizePropertyForStorage).toHaveBeenCalledWith('mockProperty1');
+				});
+
+				it('sets the specified property to the given value', () => {
+					expect(instance.data.mockNormalizedProperty1).toStrictEqual('mock value 1');
+				});
+
+				it('returns the new value', () => {
+					expect(returnValue).toStrictEqual('mock value 1');
+				});
+
+			});
+
+			describe('when `property` has a corresponding validator function that throws', () => {
+				let caughtError;
+				let validationError;
+
+				beforeEach(() => {
+					DataStore.normalizePropertyForStorage.mockClear();
+					instance.data = {};
+					validationError = new Error('mock validation error');
+					instance.validateMockProperty1 = jest.fn().mockImplementation(() => {
+						throw validationError;
+					});
+					try {
+						instance._setOne('mockProperty1', 'mock value 1');
+					} catch (error) {
+						caughtError = error;
+					}
+				});
+
+				it('validates the property value using the validator', () => {
+					expect(instance.validateMockProperty1).toHaveBeenCalledTimes(1);
+					expect(instance.validateMockProperty1).toHaveBeenCalledWith('mock value 1');
+				});
+
+				it('does not call `DataStore.normalizePropertyForStorage`', () => {
+					expect(DataStore.normalizePropertyForStorage).toHaveBeenCalledTimes(0);
+				});
+
+				it('throws the validation error', () => {
+					expect(caughtError).toStrictEqual(validationError);
+				});
+
+			});
+
 			describe('when `property` has a corresponding setter function', () => {
 
 				beforeEach(() => {
@@ -306,6 +370,29 @@ describe('lib/data-store', () => {
 					expect(() => instance._setMany(null)).toThrow(expectedError);
 				});
 
+			});
+
+		});
+
+		describe('.invalidate(message, details)', () => {
+			let caughtError;
+
+			beforeEach(() => {
+				try {
+					instance.invalidate('mock message', {
+						mockDetails: true
+					});
+				} catch (error) {
+					caughtError = error;
+				}
+			});
+
+			it('throw a ValidationError with the expected arguments', () => {
+				expect(caughtError).toBeInstanceOf(ValidationError);
+				expect(caughtError.message).toStrictEqual('mock message');
+				expect(caughtError.details).toStrictEqual({
+					mockDetails: true
+				});
 			});
 
 		});
@@ -581,6 +668,14 @@ describe('lib/data-store', () => {
 
 		it('returns the converted property', () => {
 			expect(returnValue).toStrictEqual(varname.camelback.mock.results[0].value);
+		});
+
+	});
+
+	describe('.ValidationError', () => {
+
+		it('aliases `lib/validation-error`', () => {
+			expect(DataStore.ValidationError).toStrictEqual(ValidationError);
 		});
 
 	});

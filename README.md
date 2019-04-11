@@ -17,6 +17,7 @@ Represent your data with model-like objects.
     * [Extending a data store](#extending-a-data-store)
       * [Getters](#getters)
       * [Setters](#setters)
+      * [Validators](#validators)
       * [Property normalisation](#property-normalisation)
       * [Serialized property normalization](#serialized-property-normalization)
   * [Contributing](#contributing)
@@ -228,6 +229,49 @@ class Fruit extends DataStore {
     setScientificName(value) {
         const normalizedName = Fruit.normalizePropertyForStorage('scientific-name');
         return this.data[normalizedName] = value;
+    }
+
+}
+```
+
+#### Validators
+
+Validators defined on an extended `DataStore` must be named in the format `validate<PropertyName>`, where the property name is camel-case.
+
+Validators receive one argument: the value that the property is being set to. They must either return nothing or throw an error (ideally either `DataStore.ValidationError`, or using the built-in `invalidate` method).
+
+Validators _cannot_ be async functions – they will not function correctly if they are defined as asynchronous.
+
+```js
+class Fruit extends DataStore {
+
+    validateColor(value) {
+        if (!['red', 'green', 'blue', 'yellow'].includes(color)) {
+            throw new DataStore.ValidationError('Invalid color');
+        }
+    }
+
+}
+
+// Throws because color is invalid
+const banana = new Fruit({
+    color: 'yellowy-green'
+});
+```
+
+The built-in `invalidate` method is a shortcut for creating validation errors. Validation errors have an optional second argument named `details`, which can be used to attach extra information to an error.
+
+```js
+class Fruit extends DataStore {
+
+    validateColor(value) {
+        const validColors = ['red', 'green', 'blue', 'yellow'];
+        if (!validColors.includes(color)) {
+            this.invalidate('Invalid color', {
+                given: value,
+                expected: validColors
+            });
+        }
     }
 
 }
