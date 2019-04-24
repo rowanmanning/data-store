@@ -12,13 +12,15 @@ describe('lib/validation-error', () => {
 		jest.clearAllMocks();
 	});
 
-	describe('new ValidationError(message, details)', () => {
+	describe('new ValidationError(message, details, code)', () => {
+		let code;
 		let details;
 		let instance;
 
 		beforeEach(() => {
+			code = 'MOCK_CODE';
 			details = {mockDetails: true};
-			instance = new ValidationError('mock message', details);
+			instance = new ValidationError('mock message', details, code);
 		});
 
 		it('extends `Error`', () => {
@@ -49,6 +51,14 @@ describe('lib/validation-error', () => {
 
 		});
 
+		describe('.code', () => {
+
+			it('is set to `code`', () => {
+				expect(instance.code).toStrictEqual(code);
+			});
+
+		});
+
 		describe('when `details` is undefined', () => {
 
 			beforeEach(() => {
@@ -59,6 +69,22 @@ describe('lib/validation-error', () => {
 
 				it('is set to an empty object', () => {
 					expect(instance.details).toStrictEqual({});
+				});
+
+			});
+
+		});
+
+		describe('when `code` is undefined', () => {
+
+			beforeEach(() => {
+				instance = new ValidationError('mock message', details);
+			});
+
+			describe('.code', () => {
+
+				it('is set to a default value', () => {
+					expect(instance.code).toStrictEqual('PROPERTY_VALIDATION');
 				});
 
 			});

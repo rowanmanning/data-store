@@ -2,11 +2,13 @@
 
 describe('lib/data-store', () => {
 	let DataStore;
+	let MultipleValidationError;
 	let ValidationError;
 	let varname;
 
 	beforeEach(() => {
 		jest.resetModules();
+		MultipleValidationError = require('../../../lib/multiple-validation-error');
 		ValidationError = require('../../../lib/validation-error');
 		varname = require('varname');
 		DataStore = require('../../../lib/data-store');
@@ -254,7 +256,7 @@ describe('lib/data-store', () => {
 
 				it('throws a validation error', () => {
 					expect(instance.invalidate).toHaveBeenCalledTimes(1);
-					expect(instance.invalidate).toHaveBeenCalledWith('DataStore.mockNormalizedProperty1 is not an allowed property name');
+					expect(instance.invalidate).toHaveBeenCalledWith('DataStore.mockNormalizedProperty1 is not an allowed property name', {}, 'DISALLOWED_PROPERTY');
 					expect(caughtError).toStrictEqual(instance.invalidate.mock.results[0].value);
 				});
 
@@ -445,6 +447,38 @@ describe('lib/data-store', () => {
 					expect(() => instance._setMany(123)).toThrow(expectedError);
 					expect(() => instance._setMany([])).toThrow(expectedError);
 					expect(() => instance._setMany(null)).toThrow(expectedError);
+				});
+
+			});
+
+			describe('when `_setOne` errors', () => {
+				let caughtError;
+				let validationError1;
+				let validationError2;
+
+				beforeEach(() => {
+					validationError1 = new ValidationError('mock error 1');
+					validationError2 = new ValidationError('mock error 2');
+					instance._setOne.mockReset();
+					instance._setOne.mockImplementationOnce(() => {
+						throw validationError1;
+					});
+					instance._setOne.mockImplementationOnce(() => {
+						throw validationError2;
+					});
+					try {
+						instance._setMany({
+							mockProperty1: 'mock value 1',
+							mockProperty2: 'mock value 2'
+						});
+					} catch (error) {
+						caughtError = error;
+					}
+				});
+
+				it('throws a `MultipleValidationError` error containing the thrown errors', () => {
+					expect(caughtError).toBeInstanceOf(MultipleValidationError);
+					expect();
 				});
 
 			});
