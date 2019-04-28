@@ -853,6 +853,14 @@ describe('lib/data-store', () => {
 
 	});
 
+	describe('.MultipleValidationError', () => {
+
+		it('aliases `lib/validation-error`', () => {
+			expect(DataStore.MultipleValidationError).toStrictEqual(MultipleValidationError);
+		});
+
+	});
+
 	describe('.ValidationError', () => {
 
 		it('aliases `lib/validation-error`', () => {
