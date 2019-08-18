@@ -1,15 +1,12 @@
 'use strict';
 
+const assert = require('proclaim');
+
 describe('lib/validation-error', () => {
 	let ValidationError;
 
 	beforeEach(() => {
-		jest.resetModules();
 		ValidationError = require('../../../lib/validation-error');
-	});
-
-	afterEach(() => {
-		jest.clearAllMocks();
 	});
 
 	describe('new ValidationError(message, details, code)', () => {
@@ -24,13 +21,13 @@ describe('lib/validation-error', () => {
 		});
 
 		it('extends `Error`', () => {
-			expect(instance).toBeInstanceOf(Error);
+			assert.isInstanceOf(instance, Error);
 		});
 
 		describe('.name', () => {
 
 			it('is set to "ValidationError"', () => {
-				expect(instance.name).toStrictEqual('ValidationError');
+				assert.strictEqual(instance.name, 'ValidationError');
 			});
 
 		});
@@ -38,7 +35,7 @@ describe('lib/validation-error', () => {
 		describe('.message', () => {
 
 			it('is set to `message`', () => {
-				expect(instance.message).toStrictEqual('mock message');
+				assert.strictEqual(instance.message, 'mock message');
 			});
 
 		});
@@ -46,7 +43,7 @@ describe('lib/validation-error', () => {
 		describe('.details', () => {
 
 			it('is set to `details`', () => {
-				expect(instance.details).toStrictEqual(details);
+				assert.strictEqual(instance.details, details);
 			});
 
 		});
@@ -54,7 +51,7 @@ describe('lib/validation-error', () => {
 		describe('.code', () => {
 
 			it('is set to `code`', () => {
-				expect(instance.code).toStrictEqual(code);
+				assert.strictEqual(instance.code, code);
 			});
 
 		});
@@ -68,7 +65,7 @@ describe('lib/validation-error', () => {
 			describe('.details', () => {
 
 				it('is set to an empty object', () => {
-					expect(instance.details).toStrictEqual({});
+					assert.deepEqual(instance.details, {});
 				});
 
 			});
@@ -84,7 +81,7 @@ describe('lib/validation-error', () => {
 			describe('.code', () => {
 
 				it('is set to a default value', () => {
-					expect(instance.code).toStrictEqual('PROPERTY_VALIDATION');
+					assert.strictEqual(instance.code, 'PROPERTY_VALIDATION');
 				});
 
 			});

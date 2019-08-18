@@ -1,16 +1,18 @@
 'use strict';
 
-const index = require('../../index');
-const DataStore = require('../../lib/data-store');
+const assert = require('proclaim');
 
 describe('index', () => {
+	let index;
+	let DataStore;
 
-	afterEach(() => {
-		jest.clearAllMocks();
+	beforeEach(() => {
+		index = require('../../index');
+		DataStore = require('../../lib/data-store');
 	});
 
 	it('aliases `lib/data-store`', () => {
-		expect(index).toStrictEqual(DataStore);
+		assert.strictEqual(index, DataStore);
 	});
 
 });

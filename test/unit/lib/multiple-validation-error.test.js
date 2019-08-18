@@ -1,17 +1,14 @@
 'use strict';
 
+const assert = require('proclaim');
+
 describe('lib/multiple-validation-error', () => {
 	let MultipleValidationError;
 	let ValidationError;
 
 	beforeEach(() => {
-		jest.resetModules();
 		ValidationError = require('../../../lib/validation-error');
 		MultipleValidationError = require('../../../lib/multiple-validation-error');
-	});
-
-	afterEach(() => {
-		jest.clearAllMocks();
 	});
 
 	describe('new MultipleValidationError(validationErrors)', () => {
@@ -28,13 +25,13 @@ describe('lib/multiple-validation-error', () => {
 		});
 
 		it('extends `Error`', () => {
-			expect(instance).toBeInstanceOf(Error);
+			assert.isInstanceOf(instance, Error);
 		});
 
 		describe('.name', () => {
 
 			it('is set to "MultipleValidationError"', () => {
-				expect(instance.name).toStrictEqual('MultipleValidationError');
+				assert.strictEqual(instance.name, 'MultipleValidationError');
 			});
 
 		});
@@ -42,7 +39,7 @@ describe('lib/multiple-validation-error', () => {
 		describe('.message', () => {
 
 			it('is set to a generated message based on `validationErrors`', () => {
-				expect(instance.message).toStrictEqual('3 validation errors');
+				assert.strictEqual(instance.message, '3 validation errors');
 			});
 
 		});
@@ -50,7 +47,7 @@ describe('lib/multiple-validation-error', () => {
 		describe('.validationErrors', () => {
 
 			it('is set to the passed in errors', () => {
-				expect(instance.validationErrors).toStrictEqual(validationErrors);
+				assert.deepEqual(instance.validationErrors, validationErrors);
 			});
 
 		});
@@ -69,7 +66,7 @@ describe('lib/multiple-validation-error', () => {
 			describe('.validationErrors', () => {
 
 				it('is set to an array containing only the ValidationError instances', () => {
-					expect(instance.validationErrors).toStrictEqual([
+					assert.deepEqual(instance.validationErrors, [
 						validationErrors[0]
 					]);
 				});
